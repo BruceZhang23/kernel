@@ -1,0 +1,115 @@
+yum list docker\*
+yum install docker\* -y
+systemctl start docker
+systemctl enable docker
+docker search mysql
+docker images
+docker pull centos  docker注册服务器两种镜像:基础、用户(mysql/apache)
+systemctl restart network
+docker tag centos:centos7 test1  打test1标签
+docker rmi test1 lastest
+docker ps -a
+docker run -i -t centos:centos7 /bin/bash
+
+yum install vsftpd -y  创建本地yum源
+systemctl start vsftpd
+systemctl enable vsftpd
+firewall-cmd --add-service=ftp
+firewall-cmd --add-service=ftp --permanent
+getsebool -a | grep ftp
+setsebool -P ftpd_full_access on
+cd /vat/ftp
+mkdir cdrom
+shopt -s dotglob
+mount /dev/cdrom /mnt
+cp -rf /mnt/* cdrom/
+vim /etc/yumrepo.d/aa.repo
+[aa]
+name=aa
+baseurl=ftp://192./cdrom
+enabled=1
+gpgcheck=0
+
+yum repolist
+yum list gcc
+
+docker attach CID      ps -a获取
+docker start CID
+
+yum whatprovides */ifconfig
+yum install net-tools
+
+docker run -i -t centos:centos7 /bin/bash
+exit
+docker run -i -t centos:centos7 /bin/bash
+exit
+docker run -i -t centos:centos7 /bin/bash
+exit
+docker run -i -t centos:centos7 /bin/bash
+exit           
+docker ps -a
+docker run -d centos:centos7 /bin/bash
+docker rm -f CID
+    父镜像->子镜像
+
+cd aa
+vim Dockerfile
+FROM centos:7
+MAINTAINER lduan "service@rhce.cc"
+RUN rm -rf /etc/yum.repos.d/*
+ADD aa.repo /etc/yum.repos.d/aa.repo
+RUN yum install net-tools openssh-server openssh-clients passwd -y
+CMD 开机执行 生成密钥  ssh-keygen -t rsa -P '' -f /etc/ssh/ssh_host_rsa_key
+EXPOSE 22
+
+docker build -t ssh .     创建子镜像
+docker images
+docker run -i -t ssh /bin/bash
+ifconfig       21
+ssh 20
+which sshd
+/usr/sbin/sshd -d
+ssh-keygen -t rsa -P '' -f /etc/ssh/ssh_host_rsa_key    21
+passwd
+/usr/sbin/sshd -d 
+ssh -vvv 20
+    物理机连容器
+docker run -p 10001:22 -i -t ssh /bin/bash
+ssh-keygen -t rsa -P '' -f /etc/ssh/ssh_host_rsa_key 
+/usr/sbin/sshd -d
+passwd
+
+135上 ssh 192.168.x.134 -p 10001
+
+
+        搭建私有registry
+docker search registry
+docker pull registry   
+systemctl restart network
+cat /etc/sysconfig/docker-registry
+docker run -d -p 5000:5000 registry
+docker ps -a
+docker rm -f CID
+netstat -tunlp | grep 5000
+docker tag ssh:latest 192.168.26.131:5000/ssh 新标签
+systemctl stop docker
+vim /etc/sysconfig/docker
+OPTIONS=--selinux-enabled --insecure-registry 192.168.26.131:5000 -H fd://   添加支持http
+systemctl restart docker  若起不来，重启系统 禁用reboot -f   先stop再start再restart
+docker ps -a
+docker rm -f CID
+docker run -d -p 5000:5000 registry
+docker push 192.168.26.131:5000/ssh
+       registry映射到本地目录，删除停止后就没了
+curl http://192.168.26.131:5000/v1/search
+	   
+	   另一台物理docker
+docker pull 192.168.26.131:5000/ssh
+systemctl stop docker
+vim /etc/sysconfig/docker
+OPTIONS=--selinux-enabled --insecure-registry 192.168.26.131:5000 -H fd:// 
+systemctl restart docker
+docker tag 192.168.26.131:5000/ssh ssh/v1
+docker run -i -t ssh/v1 /bin/bash
+
+port  import
